@@ -1,7 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer and game.CreatorId
 repeat task.wait() until game.Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
-if game.PlaceId ~= 14229762361 then return end
 -- Service
 local vim = game:GetService("VirtualInputManager")
 local players = game:GetService("Players")
@@ -19,6 +18,28 @@ do -- Utility
             if rawget(v, "equipped_slot") then
                 table.insert(profile_data.equipped_units, v)
             end
+        end
+    end
+end
+
+local function player_in_map()
+    if not game.PlaceId then return end
+    if game.PlaceId ~= 8304191830 then
+        return true
+    end
+    return false
+end
+
+local function join_inf()
+    for _,v in pairs(workspace._LOBBIES.Story:GetChildren()) do
+        local owner = v:FindFirstChild("Owner")
+        if owner and owner.Value == nil then
+            local args = v.Name
+            replicatedstorage.endpoints.client_to_server.request_join_lobby:InvokeServer(args)
+            task.wait()
+            replicatedstorage.endpoints.client_to_server.request_lock_level:InvokeServer(args, "namek_infinite", true, "Hard")
+            replicatedstorage.endpoints.client_to_server.request_start_game:InvokeServer(args)
+            break
         end
     end
 end
@@ -165,30 +186,15 @@ end
 task.spawn(function()
     while (task.wait(3)) do
         pcall(function()
-            local target = get_mob()
+            if player_in_map() then
+                local target = get_mob()
 
-            if (target) then
-                local m_root = target:FindFirstChild("HumanoidRootPart")
-                local m_place = get_land_place(target._stats.last_reached_bend.Value.Name)
-                local distance = (m_place - m_root.Position).magnitude
+                if (target) then
+                    local m_root = target:FindFirstChild("HumanoidRootPart")
+                    local m_place = get_land_place(target._stats.last_reached_bend.Value.Name)
+                    local distance = (m_place - m_root.Position).magnitude
 
-                if (distance <= 5) then
-                    local unit_will_place = get_place_unit()
-
-                    if (unit_will_place) then
-                        place_unit(unit_will_place, m_place)
-                    else
-                        local unit_will_upgrade = get_upgrade_unit()
-
-                        if (unit_will_upgrade) then
-                            upgrade_unit(unit_will_upgrade)
-                        end
-                    end
-                else
-                    local m_place = get_land_place(math.random(1, 2))
-                    local action = math.random(1, 2)
-
-                    if action == 1 then
+                    if (distance <= 5) then
                         local unit_will_place = get_place_unit()
 
                         if (unit_will_place) then
@@ -200,11 +206,28 @@ task.spawn(function()
                                 upgrade_unit(unit_will_upgrade)
                             end
                         end
-                    elseif action == 2 then
-                        local unit_will_upgrade = get_upgrade_unit()
+                    else
+                        local m_place = get_land_place(math.random(1, 2))
+                        local action = math.random(1, 2)
 
-                        if (unit_will_upgrade) then
-                            upgrade_unit(unit_will_upgrade)
+                        if action == 1 then
+                            local unit_will_place = get_place_unit()
+
+                            if (unit_will_place) then
+                                place_unit(unit_will_place, m_place)
+                            else
+                                local unit_will_upgrade = get_upgrade_unit()
+
+                                if (unit_will_upgrade) then
+                                    upgrade_unit(unit_will_upgrade)
+                                end
+                            end
+                        elseif action == 2 then
+                            local unit_will_upgrade = get_upgrade_unit()
+
+                            if (unit_will_upgrade) then
+                                upgrade_unit(unit_will_upgrade)
+                            end
                         end
                     end
                 end
@@ -215,15 +238,26 @@ end)
 
 task.spawn(function()
     while (task.wait()) do
-        local vote = playergui:WaitForChild("VoteStart")
-        if (vote and vote.Enabled) then
-            replicatedstorage:WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("vote_start"):InvokeServer()
-        end
+        if player_in_map() then
+            local vote = playergui:WaitForChild("VoteStart")
+            if (vote and vote.Enabled) then
+                replicatedstorage:WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("vote_start"):InvokeServer()
+            end
 
-        local results = playergui:WaitForChild("ResultsUI")
-        if (results and results.Enabled) then
-            replicatedstorage:WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer("replay")
-            break
+            local results = playergui:WaitForChild("ResultsUI")
+            if (results and results.Enabled) then
+                replicatedstorage:WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer("replay")
+                break
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    if not player_in_map() then
+        while (task.wait(0.5)) do
+            task.wait(0.5)
+            join_inf()
         end
     end
 end)
