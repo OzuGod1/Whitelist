@@ -183,6 +183,28 @@ local function upgrade_unit(unit)
     replicatedstorage.endpoints.client_to_server.upgrade_unit_ingame:InvokeServer(unit)
 end
 
+coroutine.resume(coroutine.create(function()
+    pcall(function()
+        if player_in_map() then
+            local _wave = workspace:WaitForChild("_wave_num")
+            if (_wave) then
+                _wave:GetPropertyChangedSignal("Value"):Connect(function()
+                    if (_wave.Value) then
+                        repeat task.wait() until _wave.Value >= 24
+                        for _,v in pairs(workspace._UNITS:GetChildren()) do
+                            local stats = v:FindFirstChild("_stats")
+                            local owner = stats:FindFirstChild("player")
+                            if (stats and owner and owner.Value == lp) then
+                                replicatedstorage.endpoints.client_to_server.sell_unit_ingame:InvokeServer(v)
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+end))
+
 task.spawn(function()
     while (task.wait(3)) do
         pcall(function()
