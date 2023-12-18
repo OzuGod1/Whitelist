@@ -1,6 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer and game.CreatorId
 repeat task.wait() until game.Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
+if game.PlaceId ~= 14229762361 then return end
 -- Service
 local vim = game:GetService("VirtualInputManager")
 local players = game:GetService("Players")
