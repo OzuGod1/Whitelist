@@ -6,6 +6,8 @@ local vim = game:GetService("VirtualInputManager")
 local players = game:GetService("Players")
 local replicatedstorage = game:GetService("ReplicatedStorage")
 local runservice = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
 -- Variable
 local lp = players.LocalPlayer
 local character = lp.Character
@@ -183,6 +185,22 @@ local function upgrade_unit(unit)
     replicatedstorage.endpoints.client_to_server.upgrade_unit_ingame:InvokeServer(unit)
 end
 
+local function HopServer()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/" .. tostring(8304191830) .. "/servers/Public?limit=100"
+        )).data
+     end)
+     if not success then return end
+     local server = servers[1]
+     for i,svr in pairs(servers) do
+        if svr["playing"] < server["playing"] then
+            server = svr
+        end
+     end
+     TeleportService:TeleportToPlaceInstance(8304191830, server.id)
+end
+
 coroutine.resume(coroutine.create(function()
     pcall(function()
         if player_in_map() then
@@ -281,6 +299,12 @@ task.spawn(function()
             task.wait(0.5)
             join_inf()
         end
+    end
+end)
+
+game.CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+    if child.Name == "ErrorPrompt" then
+        HopServer()
     end
 end)
 
