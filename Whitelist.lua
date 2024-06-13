@@ -1,8 +1,8 @@
-_G.Sheet = "https://sheet.best/api/sheets/f1847a16-b06c-4eeb-bb5b-da7195fe72e3"
+_G.Sheet = "https://script.google.com/macros/s/AKfycby_BTTfdt0HsUy7Ny9xI2xr5gdjuU1q4jvEJOV5QqvlA-97p1YMCd7vLXXPhBLSKBNqOA/exec"
 
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer
--- if game.PlaceId ~= 17017769292 then return end
+if game.PlaceId ~= 17017769292 then return end
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -13,7 +13,7 @@ local function fetchData()
     local success, response = pcall(function()
         return http_request{
             Method = 'GET',
-            Url = _G.Sheet
+            Url = _G.Sheet .. "?action=read"
         }.Body
     end)
     
@@ -42,11 +42,11 @@ local function getUserData()
     }
 end
 
-local function sendRequest(method, url, data)
+local function sendRequest(action)
     local success, response = pcall(function()
         return http_request{
-            Method = method,
-            Url = url,
+            Method = "GET",
+            Url = _G.Sheet .. action,
             Headers = {
                 ["Content-Type"] = "application/json"
             },
@@ -61,17 +61,15 @@ end
 
 local function createUser()
     local userData = getUserData()
-    sendRequest('POST', _G.Sheet, userData)
+    sendRequest("?action=insert&user=" .. userData.Username .. "&level=" .. userData.Level .. "&gems=" .. userData.Gems .. "&rr=1")
 end
 
 local function updateUser()
     local userData = getUserData()
-    sendRequest('PUT', _G.Sheet .. "/Username/" .. Player.Name, userData)
+    sendRequest("?action=update&user=" .. userData.Username .. "&data=" .. HttpService:JSONEncode(userData))
 end
 
--- Main
 local data = fetchData()
-print(data)
 if data then
     if userExists(data) then
         updateUser()
