@@ -4,6 +4,8 @@ repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer
 if game.PlaceId ~= 17017769292 then return end
 
+warn("=========== Google Sheet v1.0 ===========")
+
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local Player = Players and Players.LocalPlayer
