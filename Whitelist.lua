@@ -1,11 +1,11 @@
-_G.Sheet = "https://script.google.com/macros/s/AKfycby_BTTfdt0HsUy7Ny9xI2xr5gdjuU1q4jvEJOV5QqvlA-97p1YMCd7vLXXPhBLSKBNqOA/exec"
+_G.Sheet = "https://script.google.com/macros/s/AKfycbzvWxhF3atXMU9iXUzQV4n-6zzbjyOot6QLuAMzq7Hp5ZO8qcjf2Xu0bdHnVoy9Qh0/exec"
 
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game.Players.LocalPlayer
 if game.PlaceId ~= 17017769292 then return end
-
-warn("=========== Google Sheet v1.0 ===========")
-
+warn("=========================================")
+warn("=========== Google Sheet v1.1 ===========")
+warn("=========================================")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local Player = Players and Players.LocalPlayer
